@@ -3,17 +3,19 @@
 #include <EEPROM.h>
 #endif
 
-const int HX711_dout = 4; // mcu > HX711 dout pin
-const int HX711_sck = 5;  // mcu > HX711 sck pin
+#include "SMS_SS.h"
 
 HX711_ADC LoadCell(HX711_dout, HX711_sck);
 
 const int calVal_eepromAdress = 0;
 unsigned long t = 0;
 
-#include "SMS_SS.h"
 
-char number[] = "+XXxxxxxxxxx";
+// wartości do zmieniania
+
+const int HX711_dout = 11;
+const int HX711_sck = 13;
+char number[] = "+48xxxxxxxxx";
 char message[] = "Hello World!";
 
 void setup()
@@ -47,8 +49,7 @@ void setup()
     Serial.println("Startup is complete");
   }
 
-  // setupSMS();
-  // sendMessage(number, message);
+  setupSMS();
 }
 
 void loop()
@@ -70,6 +71,9 @@ void loop()
       Serial.println(i);
       newDataReady = 0;
       t = millis();
+
+      if (i > 30)
+        sendMessage(number, message);
     }
   }
 
