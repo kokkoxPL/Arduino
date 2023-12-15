@@ -1,93 +1,77 @@
-#include <HX711_ADC.h>
-#if defined(ESP8266) || defined(ESP32) || defined(AVR)
-#include <EEPROM.h>
-#endif
-
 #include "SMS_SS.h"
+#include "HX711.h"
 
-HX711_ADC LoadCell(HX711_dout, HX711_sck);
-
-const int calVal_eepromAdress = 0;
-unsigned long t = 0;
-
-
-// wartości do zmieniania
-
-const int HX711_dout = 11;
-const int HX711_sck = 13;
+unsigned long czas;
+unsigned long czas_numer2;
+unsigned long czas_alarm;
+unsigned long licznik;
+bool dziecko = true;
+bool dorosly = false;
+bool ok = false;
 char number[] = "+48xxxxxxxxx";
 char message[] = "Hello World!";
 
 void setup()
 {
   Serial.begin(57600);
-  delay(10);
-  Serial.println();
-  Serial.println("Starting...");
-
-  LoadCell.begin();
-  // LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
-  float calibrationValue;   // calibration value (see example file "Calibration.ino")
-  calibrationValue = 696.0; // uncomment this if you want to set the calibration value in the sketch
-#if defined(ESP8266) || defined(ESP32)
-  // EEPROM.begin(512); // uncomment this if you use ESP8266/ESP32 and want to fetch the calibration value from eeprom
-#endif
-  // EEPROM.get(calVal_eepromAdress, calibrationValue); // uncomment this if you want to fetch the calibration value from eeprom
-
-  unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
-  boolean _tare = true;                 // set this to false if you don't want tare to be performed in the next step
-  LoadCell.start(stabilizingtime, _tare);
-  if (LoadCell.getTareTimeoutFlag())
-  {
-    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1)
-      ;
-  }
-  else
-  {
-    LoadCell.setCalFactor(calibrationValue); // set calibration value (float)
-    Serial.println("Startup is complete");
-  }
-
-  setupSMS();
+  reset_timers();
 }
 
 void loop()
 {
-  static boolean newDataReady = 0;
-  const int serialPrintInterval = 0; // increase value to slow down serial print activity
+  delay(500);
+  licznik = millis() - licznik;
 
-  // check for new data/start next conversion:
-  if (LoadCell.update())
-    newDataReady = true;
-
-  // get smoothed value from the dataset:
-  if (newDataReady)
+  if (dziecko && !dorosly)
   {
-    if (millis() > t + serialPrintInterval)
-    {
-      float i = LoadCell.getData();
-      Serial.print("Load_cell output val: ");
-      Serial.println(i);
-      newDataReady = 0;
-      t = millis();
+    czas += licznik;
+  }
+  else
+  {
+    reset_timers();
+  }
 
-      if (i > 30)
-        sendMessage(number, message);
+  if (czas > 10000)
+  {
+    if (ok)
+    {
+      reset_timers();
+      Serial.println("reset");
+    }
+
+    if (czas_alarm > 10000)
+    {
+      Serial.println("alarm");
+      ok = true;
+    }
+    else if (czas_numer2 > 10000)
+    {
+      Serial.println("sms2");
+      czas_alarm += licznik;
+    }
+    else if (czas > 10000)
+    {
+      Serial.println("sms1");
+      czas_numer2 += licznik;
     }
   }
 
-  // receive command from serial terminal, send 't' to initiate tare operation:
-  if (Serial.available() > 0)
-  {
-    char inByte = Serial.read();
-    if (inByte == 't')
-      LoadCell.tareNoDelay();
-  }
+  Serial.print("licznik: ");
+  Serial.print(licznik);
+  Serial.print(" czas: ");
+  Serial.print(czas);
+  Serial.print(" czas_numer2: ");
+  Serial.print(czas_numer2);
+  Serial.print(" czas_alarm: ");
+  Serial.println(czas_alarm);
+  
+  licznik = millis();
+}
 
-  // check if last tare operation is complete:
-  if (LoadCell.getTareStatus() == true)
-  {
-    Serial.println("Tare complete");
-  }
+void reset_timers()
+{
+  licznik = 0;
+  czas = 0;
+  czas_numer2 = 0;
+  czas_alarm = 0;
 }
