@@ -1,77 +1,97 @@
 #include "SMS_SS.h"
 #include "HX711.h"
 
-unsigned long czas;
-unsigned long czas_numer2;
-unsigned long czas_alarm;
-unsigned long licznik;
-bool dziecko = true;
-bool dorosly = false;
+const int REED = 13;
+
+unsigned long time = 0;
+unsigned long time_number2 = 0;
+unsigned long time_alarm = 0;
+unsigned long timer = 0;
 bool ok = false;
-char number[] = "+48xxxxxxxxx";
+bool sendingSMS1 = false;
+bool sendingSMS2 = false;
+char number1[] = "+48xxxxxxxxx";
+char number2[] = "+48xxxxxxxxx";
 char message[] = "Hello World!";
+
 
 void setup()
 {
+  pinMode(REED, INPUT_PULLUP);
   Serial.begin(57600);
-  reset_timers();
+  setupHX711();
+  setupSMS();
 }
 
 void loop()
 {
   delay(500);
-  licznik = millis() - licznik;
+  timer = millis() - timer;
 
-  if (dziecko && !dorosly)
+  if (checkLoadCells())
   {
-    czas += licznik;
+    time += timer;
   }
   else
   {
     reset_timers();
   }
 
-  if (czas > 10000)
+  if (time > 3000 || sendingSMS1 || sendingSMS2)
   {
     if (ok)
     {
       reset_timers();
+      sendingSMS1 = false;
+      sendingSMS2 = false;
       Serial.println("reset");
     }
 
-    if (czas_alarm > 10000)
+    if (time_alarm > 3000)
     {
       Serial.println("alarm");
       ok = true;
     }
-    else if (czas_numer2 > 10000)
+    else if (time_number2 > 3000)
     {
       Serial.println("sms2");
-      czas_alarm += licznik;
+
+      if(!sendingSMS2) {
+        sendMessage(number2, message);
+        sendingSMS2 = true;
+      }
+
+      time_alarm += timer;
     }
-    else if (czas > 10000)
+    else if (time > 3000)
     {
       Serial.println("sms1");
-      czas_numer2 += licznik;
+
+      if(!sendingSMS1) {
+        sendMessage(number1, message);
+        sendingSMS1 = true;
+      }
+
+      time_number2 += timer;
     }
   }
 
   Serial.print("licznik: ");
-  Serial.print(licznik);
+  Serial.print(timer);
   Serial.print(" czas: ");
-  Serial.print(czas);
+  Serial.print(time);
   Serial.print(" czas_numer2: ");
-  Serial.print(czas_numer2);
+  Serial.print(time_number2);
   Serial.print(" czas_alarm: ");
-  Serial.println(czas_alarm);
+  Serial.println(time_alarm);
   
-  licznik = millis();
+  timer = millis();
 }
 
 void reset_timers()
 {
-  licznik = 0;
-  czas = 0;
-  czas_numer2 = 0;
-  czas_alarm = 0;
+  timer = 0;
+  time = 0;
+  time_number2 = 0;
+  time_alarm = 0;
 }

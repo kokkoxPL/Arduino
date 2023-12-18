@@ -53,7 +53,7 @@ Now you can compile and upload your code supporting highier buffered serial inpu
 // char destinationNumber[] = "+XXxxxxxxxxx"; // +XXxxxxxxxxx
 
 #define SMSLibDebug // use this definition to output the SMS send status messages
-// #define atDebug						//un-comment this if you want to debug the AT exchange
+#define atDebug						//un-comment this if you want to debug the AT exchange
 
 // /*do not change under this line! Insteed, make one copy for playing with.*/
 #define powerPIN 7  // Arduino Digital pin used to power up / power down the modem

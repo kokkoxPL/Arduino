@@ -3,13 +3,17 @@
 #include <EEPROM.h>
 #endif
 
-const int calVal_eepromAdress = 0;
+const int calVal_eepromAdress_1 = 0; 
+const int calVal_eepromAdress_2 = 4; 
 unsigned long t = 0;
 
-const int HX711_dout = 11;
-const int HX711_sck = 13;
+const int HX711_dout_1 = 11; 
+const int HX711_sck_1 = 12; 
+const int HX711_dout_2 = 9;
+const int HX711_sck_2 = 10;
 
-HX711_ADC LoadCell(HX711_dout, HX711_sck);
+HX711_ADC LoadCell_1(HX711_dout_1, HX711_sck_1);
+HX711_ADC LoadCell_2(HX711_dout_2, HX711_sck_2);
 
 void setupHX711();
-void loopHX711();
+bool checkLoadCells();

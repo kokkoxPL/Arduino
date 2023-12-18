@@ -197,6 +197,7 @@ void listSMS(){
 	int res=0;
 	int j=0;
 	char * pch;
+
 	while(res!=1)
 	res = fATcmd(F("+CPMS?"),10, "OK","+CMS ERROR:");//+CPMS: "SM",8,50,"SM",8,50,"SM",8,50// +CMS ERROR:
 	j=0;

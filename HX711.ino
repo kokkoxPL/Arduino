@@ -1,68 +1,76 @@
 void setupHX711()
 {
-    Serial.println("Starting...");
+  delay(10);
+  Serial.println("Starting...");
 
-    LoadCell.begin();
-    // LoadCell.setReverseOutput(); //uncomment to turn a negative output value to positive
-    float calibrationValue;   // calibration value (see example file "Calibration.ino")
-    calibrationValue = 696.0; // uncomment this if you want to set the calibration value in the sketch
-#if defined(ESP8266) || defined(ESP32)
-    // EEPROM.begin(512); // uncomment this if you use ESP8266/ESP32 and want to fetch the calibration value from eeprom
-#endif
-    // EEPROM.get(calVal_eepromAdress, calibrationValue); // uncomment this if you want to fetch the calibration value from eeprom
+  
+  float calibrationValue_1;
+  float calibrationValue_2;
 
-    unsigned long stabilizingtime = 2000; // preciscion right after power-up can be improved by adding a few seconds of stabilizing time
-    boolean _tare = true;                 // set this to false if you don't want tare to be performed in the next step
-    LoadCell.start(stabilizingtime, _tare);
-    if (LoadCell.getTareTimeoutFlag())
-    {
-        Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-        while (1)
-            ;
-    }
-    else
-    {
-        LoadCell.setCalFactor(calibrationValue); // set calibration value (float)
-        Serial.println("Startup is complete");
-    }
+  calibrationValue_1 = 696.0;
+  calibrationValue_2 = 733.0;
+
+  LoadCell_1.begin();
+  LoadCell_2.begin();
+
+  unsigned long stabilizingtime = 2000;
+  boolean _tare = true;
+  byte loadcell_1_rdy = 0;
+  byte loadcell_2_rdy = 0;
+  while ((loadcell_1_rdy + loadcell_2_rdy) < 2) { 
+    if (!loadcell_1_rdy) loadcell_1_rdy = LoadCell_1.startMultiple(stabilizingtime, _tare);
+    if (!loadcell_2_rdy) loadcell_2_rdy = LoadCell_2.startMultiple(stabilizingtime, _tare);
+  }
+  if (LoadCell_1.getTareTimeoutFlag()) {
+    Serial.println("Timeout, check MCU>HX711 no.1 wiring and pin designations");
+  }
+  if (LoadCell_2.getTareTimeoutFlag()) {
+    Serial.println("Timeout, check MCU>HX711 no.2 wiring and pin designations");
+  }
+  LoadCell_1.setCalFactor(calibrationValue_1); 
+  LoadCell_2.setCalFactor(calibrationValue_2); 
+  Serial.println("Startup is complete");
 }
 
-void loopHX711()
+bool checkLoadCells()
 {
-    static boolean newDataReady = 0;
-    const int serialPrintInterval = 0; // increase value to slow down serial print activity
+  int kontaktron = digitalRead(REED);
+  static boolean newDataReady = 0;
+  const int serialPrintInterval = 0; 
+  if (LoadCell_1.update()) newDataReady = true;
+  LoadCell_2.update();
 
-    // check for new data/start next conversion:
-    if (LoadCell.update())
-        newDataReady = true;
-
-    // get smoothed value from the dataset:
-    if (newDataReady)
-    {
-        if (millis() > t + serialPrintInterval)
-        {
-            float i = LoadCell.getData();
-            Serial.print("Load_cell output val: ");
-            Serial.println(i);
-            newDataReady = 0;
-            t = millis();
-
-            if (i > 30)
-                sendMessage(number, message);
-        }
+  if ((newDataReady)) {
+    if (millis() > t + serialPrintInterval) {
+      float a = LoadCell_1.getData();
+      float b = LoadCell_2.getData();
+      Serial.print("Load_cell 1 output val: ");
+      Serial.print(a);
+      Serial.print("Load_cell 2 output val: ");
+      Serial.println(b);
+      Serial.print("Kontaktron: ");
+      Serial.println(kontaktron);
+      newDataReady = 0;
+      t = millis();
+      if (a > 30 && b > -1 && kontaktron==HIGH){
+        return true;
+      }
+      else {
+        return false;
+      }
     }
-
-    // receive command from serial terminal, send 't' to initiate tare operation:
-    if (Serial.available() > 0)
-    {
-        char inByte = Serial.read();
-        if (inByte == 't')
-            LoadCell.tareNoDelay();
-    }
-
-    // check if last tare operation is complete:
-    if (LoadCell.getTareStatus() == true)
-    {
-        Serial.println("Tare complete");
-    }
+  }
+  // if (Serial.available() > 0) {
+  //   char inByte = Serial.read();
+  //   if (inByte == 't') {
+  //     LoadCell_1.tareNoDelay();
+  //     LoadCell_2.tareNoDelay();
+  //   }
+  // }
+  // if (LoadCell_1.getTareStatus() == true) {
+  //   Serial.println("Tare load cell 1 complete");
+  // }
+  // if (LoadCell_2.getTareStatus() == true) {
+  //   Serial.println("Tare load cell 2 complete");
+  // }
 }
