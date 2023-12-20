@@ -52,7 +52,7 @@ bool checkLoadCells()
       Serial.println(kontaktron);
       newDataReady = 0;
       t = millis();
-      if (a > 30 && b > -1 && kontaktron==HIGH){
+      if (a > 30 && b > 30 && kontaktron==HIGH){
         return true;
       }
       else {
