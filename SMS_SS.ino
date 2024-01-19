@@ -200,7 +200,7 @@ void sendMessage(char destinationNumber[], char message[])
       // restartMODEM();
       printDebugLN(F("That's all folks!"));
       delay(10000);
-      // state=0;
+      state=0;
       break;
     }
   }

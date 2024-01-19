@@ -2,6 +2,7 @@
 #include "HX711.h"
 
 const int REED = 13;
+const int ALARM;
 
 unsigned long time = 0;
 unsigned long time_number2 = 0;
@@ -18,6 +19,7 @@ char message[] = "Hello World!";
 void setup()
 {
   pinMode(REED, INPUT_PULLUP);
+  // pinMode(REED, OUTPUT);
   Serial.begin(57600);
   setupHX711();
   setupSMS();
@@ -39,6 +41,11 @@ void loop()
 
   if (time > 3000 || sendingSMS1 || sendingSMS2)
   {
+    if (getCallStatus() == 4) {
+        ok = true;
+        hangup();
+      }
+
     if (ok)
     {
       reset_timers();
@@ -50,6 +57,10 @@ void loop()
     if (time_alarm > 3000)
     {
       Serial.println("alarm");
+      // tone(ALARM, 1000);
+      // delay(1000);
+      // noTone(ALARM);
+      // delay(1000);
       ok = true;
     }
     else if (time_number2 > 3000)
