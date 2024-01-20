@@ -34,7 +34,7 @@ void setupHX711()
 
 bool checkLoadCells()
 {
-  int kontaktron = digitalRead(REED);
+  int kontaktron = !digitalRead(REED);
   static boolean newDataReady = 0;
   const int serialPrintInterval = 0; 
   if (LoadCell_1.update()) newDataReady = true;
@@ -52,7 +52,7 @@ bool checkLoadCells()
       Serial.println(kontaktron);
       newDataReady = 0;
       t = millis();
-      if (a > 30 && b > 30 && kontaktron==HIGH){
+      if (a < 30 && b > 30 && kontaktron==HIGH){
         return true;
       }
       else {
@@ -60,17 +60,4 @@ bool checkLoadCells()
       }
     }
   }
-  // if (Serial.available() > 0) {
-  //   char inByte = Serial.read();
-  //   if (inByte == 't') {
-  //     LoadCell_1.tareNoDelay();
-  //     LoadCell_2.tareNoDelay();
-  //   }
-  // }
-  // if (LoadCell_1.getTareStatus() == true) {
-  //   Serial.println("Tare load cell 1 complete");
-  // }
-  // if (LoadCell_2.getTareStatus() == true) {
-  //   Serial.println("Tare load cell 2 complete");
-  // }
 }
