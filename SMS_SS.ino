@@ -161,7 +161,7 @@ void sendMessage(char destinationNumber[], char message[])
 
       printDebugLN(F("Prepare the modem for SMS usage!"));
       setupMODEMforSMSusage();
-      delay(10000);
+      delay(100);
       offsetTime = millis();
       state++;
       break;
@@ -178,7 +178,6 @@ void sendMessage(char destinationNumber[], char message[])
 
       // if(sendSMS(destinationNumber,message,"147")==1) printDebugLN("test SMS has been send with succees!");
 
-      // in real app you would like to use it like bellow
       if(sendSMS(destinationNumber,message) == 1) {
         printDebugLN("SMS SUCCESS");
       }
@@ -189,7 +188,7 @@ void sendMessage(char destinationNumber[], char message[])
       clearBUFFD();
       clearagsmSerial();
 
-      delay(10000);
+      delay(100);
       offsetTime = millis();
 
       state++;
@@ -199,7 +198,7 @@ void sendMessage(char destinationNumber[], char message[])
       loop = false;
       // restartMODEM();
       printDebugLN(F("That's all folks!"));
-      delay(10000);
+      delay(100);
       state=0;
       break;
     }
