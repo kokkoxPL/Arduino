@@ -3,17 +3,16 @@
 
 const unsigned int REED = 10;
 const unsigned int ALARM = 13;
-
-const unsigned long time_to_count = 500;
+const unsigned int time_between_loop = 500;
+const unsigned int time_max = 180000;
 unsigned long timer = 0;
-unsigned long time_number2 = 0;
+unsigned long timer_number2 = 0;
 unsigned long timer_alarm = 0;
-bool ok = false;
 bool sendingSMS1 = false;
 bool sendingSMS2 = false;
 char number1[] = "+48xxxxxxxxx";
 char number2[] = "+48xxxxxxxxx";
-char message[] = "W aucie zostało dziecko!!! Wróć do auta lub zadzwoń na ten numer aby oznać że wszystko jest dobrze.";
+char message[] = "W aucie zostalo dziecko!!! Wroc do auta lub zadzwon na ten numer aby oznac ze wszystko jest dobrze.";
 
 void setup()
 {
@@ -28,66 +27,66 @@ void setup()
 
 void loop()
 {
-  delay(time_to_count);
+  delay(time_between_loop);
 
   if (checkLoadCells())
   {
-    timer += time_to_count;
+    timer += time_between_loop;
   }
   else
   {
     reset_timers();
   }
 
-  if (timer > 300000 || sendingSMS1 || sendingSMS2)
+  if (timer > time_max || sendingSMS1 || sendingSMS2)
   {
-    if (getcallStatus() == 4) {
-        ok = true;
-        hangup();
-      }
-
-    if (ok)
+    if (getcallStatus() == 4)
     {
+      hangup();
       reset_timers();
       sendingSMS1 = false;
       sendingSMS2 = false;
-      noTone(ALARM);
       Serial.println("reset");
     }
 
-    if (timer_alarm > 300000)
+    if (timer_alarm > time_max)
     {
       Serial.println("alarm");
       tone(ALARM, 1000);
+      delay(500);
+      noTone(ALARM);
+      delay(100);
     }
-    else if (time_number2 > 300000)
+    else if (timer_number2 > time_max)
     {
-      if(!sendingSMS2) {
+      if (!sendingSMS2)
+      {
         Serial.println("sms2");
         sendMessage(number2, message);
         sendingSMS2 = true;
       }
 
-      timer_alarm += time_to_count;
+      timer_alarm += time_between_loop;
     }
     else if (timer > 300000)
     {
-      if(!sendingSMS1) {
+      if (!sendingSMS1)
+      {
         Serial.println("sms1");
         sendMessage(number1, message);
         sendingSMS1 = true;
       }
 
-      time_number2 += time_to_count;
+      timer_number2 += time_between_loop;
     }
   }
 
   Serial.print("licznik: ");
-  Serial.print(time_to_count);
+  Serial.print(time_between_loop);
   Serial.print(" czas: ");
   Serial.print(timer);
   Serial.print(" czas_numer2: ");
-  Serial.print(time_number2);
+  Serial.print(timer_number2);
   Serial.print(" czas_alarm: ");
   Serial.println(timer_alarm);
 }
@@ -95,6 +94,6 @@ void loop()
 void reset_timers()
 {
   timer = 0;
-  time_number2 = 0;
+  timer_number2 = 0;
   timer_alarm = 0;
 }

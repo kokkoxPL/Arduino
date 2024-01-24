@@ -3,14 +3,13 @@
 #include <EEPROM.h>
 #endif
 
-const int calVal_eepromAdress_1 = 0; 
-const int calVal_eepromAdress_2 = 4; 
+const int calVal_eepromAdress_1 = 0;
+const int calVal_eepromAdress_2 = 4;
+const unsigned int HX711_dout_1 = 11;
+const unsigned int HX711_sck_1 = 12;
+const unsigned int HX711_dout_2 = 8;
+const unsigned int HX711_sck_2 = 9;
 unsigned long t = 0;
-
-const int HX711_dout_1 = 11; 
-const int HX711_sck_1 = 12; 
-const int HX711_dout_2 = 9;
-const int HX711_sck_2 = 10;
 
 HX711_ADC LoadCell_1(HX711_dout_1, HX711_sck_1);
 HX711_ADC LoadCell_2(HX711_dout_2, HX711_sck_2);

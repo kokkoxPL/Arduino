@@ -47,7 +47,8 @@ void sendMessage(char destinationNumber[], char message[])
   int smslen = 0;
   bool loop = true;
 
-  while(loop) {
+  while (loop)
+  {
     switch (state)
     {
     case 0: // check modem status
@@ -174,14 +175,12 @@ void sendMessage(char destinationNumber[], char message[])
 
       printDebugLN(F("Let's send one SMS..."));
 
-      // sendSMS(destinationNumber, message);
-
-      // if(sendSMS(destinationNumber,message,"147")==1) printDebugLN("test SMS has been send with succees!");
-
-      if(sendSMS(destinationNumber,message) == 1) {
+      if (sendSMS(destinationNumber, message) == 1)
+      {
         printDebugLN("SMS SUCCESS");
       }
-      else {
+      else
+      {
         printDebugLN("SMS FAILURE");
       }
 
@@ -199,7 +198,7 @@ void sendMessage(char destinationNumber[], char message[])
       // restartMODEM();
       printDebugLN(F("That's all folks!"));
       delay(100);
-      state=0;
+      state = 0;
       break;
     }
   }
